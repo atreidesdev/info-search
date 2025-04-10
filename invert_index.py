@@ -1,6 +1,5 @@
 import os
 import json
-import re
 from collections import defaultdict
 
 def build_inverted_index(base_path="pages"):
