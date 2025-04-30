@@ -96,5 +96,29 @@
 3. Запустить краулер - `python crawler.py`
 4. Запустить организатор файлов - `python organizer.py`
 5. Запустить токенизатор - `python tokenizer.py`
-6. Запустить расчет TF-IDF - `python calculate_tf_idf.py`
+6. Запустить создание инвертированного индекса - `python inverted_index.py`
+7. Запустить расчет TF-IDF - `python calculate_tf_idf.py`
 
+
+---
+
+## Задание 5
+
+1. Разработать поисковую систему на основе векторного поиска по построенному индексу
+
+2. Для оценки выполнения задания необходимо предоставить:
+   - Ссылку на рабочую версию кода в репозитории.
+
+---
+
+### Инструкция:
+
+0. Создать виртуальное окружение - `python -m venv venv`
+1. Активировать виртуальное окружение - `source venv/bin/activate`
+2. Установить зависимости - `pip install -r requirements.txt`
+3. Запустить краулер - `python crawler.py`
+4. Запустить организатор файлов - `python organizer.py`
+5. Запустить токенизатор - `python tokenizer.py`
+6. Запустить создание инвертированного индекса - `python inverted_index.py`
+7. Запустить расчет TF-IDF - `python calculate_tf_idf.py`
+8. Запустить векторный поиск TF-IDF - `python vector_index_search.py`

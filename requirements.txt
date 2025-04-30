@@ -8,3 +8,5 @@ charset-normalizer~=3.4.1
 nltk~=3.9.1
 beautifulsoup4~=4.13.3
 pymorphy3~=2.0.3
+numpy~=2.2.5
+scikit-learn~=1.6.1
