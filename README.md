@@ -96,6 +96,5 @@
 3. Запустить краулер - `python crawler.py`
 4. Запустить организатор файлов - `python organizer.py`
 5. Запустить токенизатор - `python tokenizer.py`
-6. Запустить создание инвертированного индекса - `python inverted_index.py`
-7. Запустить расчет TF-IDF - `python calculate_tf_idf.py`
+6. Запустить расчет TF-IDF - `python calculate_tf_idf.py`
 
