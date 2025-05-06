@@ -1,10 +1,12 @@
+from flask import Flask, render_template, request
 import json
 from collections import defaultdict
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.pipeline import FeatureUnion
 import numpy as np
+
+app = Flask(__name__)
 
 class VectorSearchEngine:
     def __init__(self, index_path="inverted_index.json"):
@@ -37,11 +39,11 @@ class VectorSearchEngine:
     def get_snippet(self, doc_tokens, query_terms):
         tokens = doc_tokens.split()
         for tok in tokens:
-            if any(qt.lower() in tok.lower() for qt in query_terms):
+            if any(q_term.lower() in tok.lower() for q_term in query_terms):
                 return tok
-        return ""
+        return ''
 
-    def search(self, query, top_k=5):
+    def search(self, query, top_k=10):
         query_vec = self.vectorizer.transform([query])
         sims = cosine_similarity(query_vec, self.tfidf_matrix).flatten()
         top_idx = np.argsort(sims)[::-1][:top_k]
@@ -56,22 +58,18 @@ class VectorSearchEngine:
                 results.append((doc, score, snippet))
         return results
 
-if __name__ == "__main__":
-    engine = VectorSearchEngine()
-    engine.build_index()
+engine = VectorSearchEngine()
+engine.build_index()
 
-    print("Векторный поиск. Введите запрос (пустая строка — выход):")
-    while True:
-        query = input("Запрос: ").strip()
-        if not query:
-            break
-        results = engine.search(query)
-        if results:
-            print("Результаты:")
-            for doc, score, snippet in results:
-                if snippet:
-                    print(f"  {doc}: {score:.4f}  → совпало: «{snippet}»")
-                else:
-                    print(f"  {doc}: {score:.4f}")
-        else:
-            print("Совпадений не найдено.")
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    results = []
+    query = ''
+    if request.method == 'POST':
+        query = request.form.get('query', '').strip()
+        if query:
+            results = engine.search(query)
+    return render_template('index.html', query=query, results=results)
+
+if __name__ == '__main__':
+    app.run(debug=True)

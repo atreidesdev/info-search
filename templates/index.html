@@ -1,0 +1,36 @@
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>Векторный поиск</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 2rem; }
+      input[type="text"] { width: 60%; padding: 0.5rem; }
+      button { padding: 0.5rem 1rem; }
+      .result { margin: 0.5rem 0; }
+      .score { color: #555; font-size: 0.9rem; }
+      .snippet { color: #222; margin-left: 1rem; font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <h1>Векторный поиск по индексу</h1>
+    <form method="post">
+      <input type="text" name="query" placeholder="Введите запрос" value="{{ query }}" required />
+      <button type="submit">Поиск</button>
+    </form>
+
+    {% if results %}
+      <h2>Топ {{ results|length }} результатов для «{{ query }}»:</h2>
+      <ul>
+      {% for doc, score, snippet in results %}
+        <li class="result">
+          <strong>{{ doc }}</strong>
+          <span class="score">({{ '%.4f'|format(score) }})</span>
+          {% if snippet %}<span class="snippet">Найдено: {{ snippet }}</span>{% endif %}
+        </li>
+      {% endfor %}
+      </ul>
+    {% elif query %}
+      <p>Совпадений не найдено.</p>
+    {% endif %}
+  </body>
+</html>

@@ -10,3 +10,4 @@ beautifulsoup4~=4.13.3
 pymorphy3~=2.0.3
 numpy~=2.2.5
 scikit-learn~=1.6.1
+flask
