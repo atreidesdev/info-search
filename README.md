@@ -133,4 +133,4 @@
 ### Инструкция:
 
 0. повторить шаги из предыдущих заданий
-1. python flask_vector.py
+1. `python flask_vector.py`
