@@ -4,6 +4,12 @@ import math
 
 PAGES_DIR = "pages"
 
+import json
+
+def save_tf_idf_json(file_path, data):
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
 
 def read_tokens(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -85,6 +91,10 @@ def process_page(page_dir):
 
     lemmas_result_file = os.path.join(page_dir, "lemmas_tf_idf.txt")
     save_results(lemmas_result_file, lemma_tf_idf)
+    save_tf_idf_json(os.path.join(page_dir, "terms_tf_idf.json"),
+                     {term: {"idf": idf, "tfidf": tfidf} for term, (idf, tfidf) in term_tf_idf.items()})
+    save_tf_idf_json(os.path.join(page_dir, "lemmas_tf_idf.json"),
+                     {lemma: {"idf": idf, "tfidf": tfidf} for lemma, (idf, tfidf) in lemma_tf_idf.items()})
 
 def main():
     if not os.path.exists(PAGES_DIR):

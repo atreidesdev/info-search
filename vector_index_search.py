@@ -1,38 +1,46 @@
+import os
 import json
-from collections import defaultdict
-
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.pipeline import FeatureUnion
-import numpy as np
+
 
 class VectorSearchEngine:
-    def __init__(self, index_path="inverted_index.json"):
-        self.index_path = index_path
+    def __init__(self, pages_dir="pages"):
+        self.pages_dir = pages_dir
+        self.doc_names = []
+        self.doc_texts = []
         self.doc_to_tokens = {}
         self.vectorizer = FeatureUnion([
             ("word", TfidfVectorizer(analyzer="word")),
-            ("char", TfidfVectorizer(analyzer="char_wb", ngram_range=(3,5)))
+            ("char", TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5)))
         ])
-        self.doc_names = []
+        self.tfidf_matrix = None
 
-    def load_inverted_index(self):
-        with open(self.index_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+    def load_terms_from_pages(self):
+        doc_to_tokens = {}
+        for folder_name in os.listdir(self.pages_dir):
+            folder_path = os.path.join(self.pages_dir, folder_name)
+            if not os.path.isdir(folder_path):
+                continue
 
-    def build_doc_token_map(self, inverted_index):
-        doc_to_tokens = defaultdict(list)
-        for term, docs in inverted_index.items():
-            for doc in docs:
-                doc_to_tokens[doc].append(term)
+            tfidf_file = os.path.join(folder_path, "terms_tf_idf.json")
+            if not os.path.exists(tfidf_file):
+                continue
+
+            with open(tfidf_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                tokens = list(data.keys())
+                doc_to_tokens[folder_name] = tokens
+
         return doc_to_tokens
 
     def build_index(self):
-        raw_index = self.load_inverted_index()
-        self.doc_to_tokens = self.build_doc_token_map(raw_index)
+        self.doc_to_tokens = self.load_terms_from_pages()
         self.doc_names = sorted(self.doc_to_tokens.keys())
-        docs_as_strings = [" ".join(self.doc_to_tokens[doc]) for doc in self.doc_names]
-        self.tfidf_matrix = self.vectorizer.fit_transform(docs_as_strings)
+        self.doc_texts = [" ".join(self.doc_to_tokens[doc]) for doc in self.doc_names]
+        self.tfidf_matrix = self.vectorizer.fit_transform(self.doc_texts)
 
     def get_snippet(self, doc_tokens, query_terms):
         tokens = doc_tokens.split()
@@ -45,16 +53,19 @@ class VectorSearchEngine:
         query_vec = self.vectorizer.transform([query])
         sims = cosine_similarity(query_vec, self.tfidf_matrix).flatten()
         top_idx = np.argsort(sims)[::-1][:top_k]
+
         results = []
-        query_terms = query.split()
+        query_terms = query.lower().split()
         for i in top_idx:
             score = float(sims[i])
             if score > 0:
                 doc = self.doc_names[i]
-                tokens_str = " ".join(self.doc_to_tokens[doc])
-                snippet = self.get_snippet(tokens_str, query_terms)
-                results.append((doc, score, snippet))
+                snippet = self.get_snippet(self.doc_texts[i], query_terms)
+                if snippet:
+                    results.append((doc, score, snippet))
         return results
+
+
 
 if __name__ == "__main__":
     engine = VectorSearchEngine()
@@ -69,9 +80,6 @@ if __name__ == "__main__":
         if results:
             print("Результаты:")
             for doc, score, snippet in results:
-                if snippet:
-                    print(f"  {doc}: {score:.4f}  → совпало: «{snippet}»")
-                else:
-                    print(f"  {doc}: {score:.4f}")
+                print(f"  {doc}: {score:.4f} | Фрагмент: ...{snippet}...")
         else:
             print("Совпадений не найдено.")
